@@ -33,6 +33,10 @@ func (item Item) GetProtectedFields() []string {
 	return []string{"ID"}
 }
 
+func (item Item) GetModifiableFields() []string {
+	return []string{"Name", "Stock", "Price"}
+}
+
 func (item Item) GetRequestMap() map[string]any {
 	return item.requestMap
 }

@@ -16,6 +16,7 @@ type Resource[I IdType] interface {
 	GetCreatedAt() time.Time
 	GetUpdatedAt() time.Time
 	GetProtectedFields() []string
+	GetModifiableFields() []string
 	GetRequestMap() map[string]any
 	FromReuestDto(d dto.RequestDTO) Resource[I]
 }
