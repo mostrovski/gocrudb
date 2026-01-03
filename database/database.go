@@ -1,7 +1,9 @@
 package database
 
 import (
+	"context"
 	"gocrudb/config"
+	"gocrudb/resource"
 	"log"
 	"time"
 
@@ -29,9 +31,30 @@ func Init() *gorm.DB {
 }
 
 func Migrate(db *gorm.DB, resources ...any) {
-	if !config.IsProduction() {
-		for _, r := range resources {
-			db.AutoMigrate(&r)
-		}
+	if config.IsProduction() {
+		return
 	}
+
+	for _, r := range resources {
+		db.AutoMigrate(&r)
+	}
+}
+
+func Seed[I resource.IdType, R resource.Resource[I]](db *gorm.DB, resources []R) {
+	if config.IsProduction() {
+		return
+	}
+
+	ctx := context.Background()
+	manager := gorm.G[R](db)
+
+	count, err := manager.Count(ctx, "")
+	if err != nil {
+		return
+	}
+	if count > 0 {
+		return
+	}
+
+	manager.CreateInBatches(ctx, &resources, 100)
 }

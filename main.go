@@ -20,6 +20,8 @@ var db *gorm.DB
 func main() {
 	db = database.Init()
 	database.Migrate(db, resource.Item{})
+	database.Seed(db, database.GetSeedItems())
+
 	r := repository.SqlRepository[uuid.UUID, resource.Item]{}.Init(db)
 
 	router := gin.Default()
