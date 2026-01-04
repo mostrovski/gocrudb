@@ -6,17 +6,17 @@ type CreateItem struct {
 	Price *float64 `json:"price" binding:"required,gte=0"`
 }
 
-func (d CreateItem) ToRequestMap() map[string]any {
+func (request CreateItem) ToRequestMap() map[string]any {
 	m := map[string]any{}
 
-	if d.Name != nil {
-		m["Name"] = *d.Name
+	if request.Name != nil {
+		m["Name"] = *request.Name
 	}
-	if d.Stock != nil {
-		m["Stock"] = *d.Stock
+	if request.Stock != nil {
+		m["Stock"] = *request.Stock
 	}
-	if d.Price != nil {
-		m["Price"] = *d.Price
+	if request.Price != nil {
+		m["Price"] = *request.Price
 	}
 
 	return m

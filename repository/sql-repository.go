@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"gocrudb/resource"
+	"gocrudb/structure"
 	"slices"
 
 	"gorm.io/gorm"
@@ -23,8 +25,14 @@ func (r SqlRepository[I, R]) Init(db *gorm.DB) SqlRepository[I, R] {
 	return r
 }
 
-func (r SqlRepository[I, R]) Get() ([]R, error) {
-	return r.manager.Find(context.Background())
+func (r SqlRepository[I, R]) Get(sorts []structure.SortBy) ([]R, error) {
+	query := r.manager.Order("")
+
+	for _, sort := range sorts {
+		query = query.Order(fmt.Sprintf("%s %s", sort.Field, sort.Direction))
+	}
+
+	return query.Find(context.Background())
 }
 
 func (r SqlRepository[I, R]) Find(id I) (R, error) {

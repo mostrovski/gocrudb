@@ -2,18 +2,20 @@ package main
 
 import (
 	"errors"
+	"gocrudb/config"
 	"gocrudb/database"
 	"gocrudb/dto"
 	"gocrudb/repository"
 	"gocrudb/resource"
+	"gocrudb/validation"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
-
-const PORT = ":3000"
 
 var db *gorm.DB
 
@@ -24,9 +26,21 @@ func main() {
 
 	r := repository.SqlRepository[uuid.UUID, resource.Item]{}.Init(db)
 
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		for tag, val := range validation.MapCustomByTag() {
+			v.RegisterValidation(tag, val)
+		}
+	}
+
 	router := gin.Default()
 	router.GET("/inventory", func(c *gin.Context) {
-		items, err := r.Get()
+		var queryDTO dto.QueryItem
+		if err := c.ShouldBindQuery(&queryDTO); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		items, err := r.Get(queryDTO.ToQuerySorts())
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 			return
@@ -118,5 +132,5 @@ func main() {
 		}
 		c.JSON(http.StatusOK, gin.H{})
 	})
-	router.Run(PORT)
+	router.Run(config.AppPort())
 }
