@@ -25,6 +25,12 @@ type QueryItem struct {
 	UpdatedAtMax *time.Time `form:"updated_at_max" time_format:"2006-01-02"`
 	SortBy       *string    `form:"sort_by" binding:"omitnil,item_sort_by"`
 	SortOrder    *string    `form:"sort_order" binding:"omitnil,item_sort_order"`
+	Page         *uint      `form:"page"`
+	PerPage      *uint      `form:"per_page"`
+}
+
+func (q QueryItem) ToQueryConditions() structure.Conditions {
+	return structure.Conditions{Sorts: q.ToQuerySorts(), Pagination: q.ToQueryPagination()}
 }
 
 func (q QueryItem) ToQuerySorts() []structure.SortBy {
@@ -60,6 +66,19 @@ func (q QueryItem) ToQuerySorts() []structure.SortBy {
 	}
 
 	return s
+}
+
+func (q QueryItem) ToQueryPagination() structure.Paginate {
+	p := structure.Paginate{}
+
+	if q.Page != nil {
+		p.Page = *q.Page
+	}
+	if q.PerPage != nil {
+		p.PerPage = *q.PerPage
+	}
+
+	return p
 }
 
 var ValidItemSortBy validator.Func = func(fl validator.FieldLevel) bool {

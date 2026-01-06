@@ -25,11 +25,13 @@ func (r SqlRepository[I, R]) Init(db *gorm.DB) SqlRepository[I, R] {
 	return r
 }
 
-func (r SqlRepository[I, R]) Get(sorts []structure.SortBy) ([]R, error) {
-	query := r.manager.Order("")
+func (r SqlRepository[I, R]) Get(conditions structure.Conditions) ([]R, error) {
+	query := r.withPagination(conditions.Pagination)
 
-	for _, sort := range sorts {
-		query = query.Order(fmt.Sprintf("%s %s", sort.Field, sort.Direction))
+	if conditions.Sorts != nil {
+		for _, sort := range conditions.Sorts {
+			query = query.Order(fmt.Sprintf("%s %s", sort.Field, sort.Direction))
+		}
 	}
 
 	return query.Find(context.Background())
@@ -58,6 +60,23 @@ func (r SqlRepository[I, R]) Update(instance R) (R, error) {
 func (r SqlRepository[I, R]) Delete(id I) error {
 	_, err := r.manager.Where("id = ?", id).Delete(context.Background())
 	return err
+}
+
+func (r SqlRepository[I, R]) withPagination(p structure.Paginate) gorm.ChainInterface[R] {
+	page := int(p.Page)
+	perPage := int(p.PerPage)
+
+	skipPages := 0
+	if page > 0 {
+		skipPages = page - 1
+	}
+	query := r.manager.Offset(skipPages * perPage)
+
+	if perPage > 0 {
+		query = query.Limit(perPage)
+	}
+
+	return query
 }
 
 func (r SqlRepository[I, R]) withRequestMap(query gorm.ChainInterface[R], instance R) gorm.ChainInterface[R] {

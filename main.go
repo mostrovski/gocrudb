@@ -40,7 +40,7 @@ func main() {
 			return
 		}
 
-		items, err := r.Get(queryDTO.ToQuerySorts())
+		items, err := r.Get(queryDTO.ToQueryConditions())
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 			return
