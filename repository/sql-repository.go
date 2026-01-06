@@ -28,10 +28,11 @@ func (r SqlRepository[I, R]) Init(db *gorm.DB) SqlRepository[I, R] {
 func (r SqlRepository[I, R]) Get(conditions structure.Conditions) ([]R, error) {
 	query := r.withPagination(conditions.Pagination)
 
+	if conditions.Filters != nil {
+		query = r.withFilters(query, conditions.Filters)
+	}
 	if conditions.Sorts != nil {
-		for _, sort := range conditions.Sorts {
-			query = query.Order(fmt.Sprintf("%s %s", sort.Field, sort.Direction))
-		}
+		query = r.withSorts(query, conditions.Sorts)
 	}
 
 	return query.Find(context.Background())
@@ -74,6 +75,28 @@ func (r SqlRepository[I, R]) withPagination(p structure.Paginate) gorm.ChainInte
 
 	if perPage > 0 {
 		query = query.Limit(perPage)
+	}
+
+	return query
+}
+
+func (r SqlRepository[I, R]) withFilters(query gorm.ChainInterface[R], filters []structure.FilterBy) gorm.ChainInterface[R] {
+	for _, f := range filters {
+		operator := f.Operator
+		value := f.Value
+		if operator == "like" {
+			operator = "ILIKE"
+			value = "%" + value.(string) + "%"
+		}
+		query = query.Where(fmt.Sprintf("%s %s ?", f.Field, operator), value)
+	}
+
+	return query
+}
+
+func (r SqlRepository[I, R]) withSorts(query gorm.ChainInterface[R], sorts []structure.SortBy) gorm.ChainInterface[R] {
+	for _, s := range sorts {
+		query = query.Order(fmt.Sprintf("%s %s", s.Field, s.Direction))
 	}
 
 	return query

@@ -17,10 +17,8 @@ type QueryItem struct {
 	Price        *float64   `form:"price"`
 	PriceMin     *float64   `form:"price_min"`
 	PriceMax     *float64   `form:"price_max"`
-	CreatedAt    *time.Time `form:"created_at" time_format:"2006-01-02"`
 	CreatedAtMin *time.Time `form:"created_at_min" time_format:"2006-01-02"`
 	CreatedAtMax *time.Time `form:"created_at_max" time_format:"2006-01-02"`
-	UpdatedAt    *time.Time `form:"updated_at" time_format:"2006-01-02"`
 	UpdatedAtMin *time.Time `form:"updated_at_min" time_format:"2006-01-02"`
 	UpdatedAtMax *time.Time `form:"updated_at_max" time_format:"2006-01-02"`
 	SortBy       *string    `form:"sort_by" binding:"omitnil,item_sort_by"`
@@ -30,7 +28,53 @@ type QueryItem struct {
 }
 
 func (q QueryItem) ToQueryConditions() structure.Conditions {
-	return structure.Conditions{Sorts: q.ToQuerySorts(), Pagination: q.ToQueryPagination()}
+	return structure.Conditions{
+		Filters:    q.ToQueryFilters(),
+		Sorts:      q.ToQuerySorts(),
+		Pagination: q.ToQueryPagination(),
+	}
+}
+
+func (q QueryItem) ToQueryFilters() []structure.FilterBy {
+	f := []structure.FilterBy{}
+
+	if q.Name != nil {
+		f = append(f, structure.FilterBy{Field: "name", Operator: "like", Value: *q.Name})
+	}
+	if q.Stock != nil {
+		f = append(f, structure.FilterBy{Field: "stock", Operator: "=", Value: *q.Stock})
+	}
+	if q.Price != nil {
+		f = append(f, structure.FilterBy{Field: "price", Operator: "=", Value: *q.Price})
+	}
+
+	if q.StockMin != nil && q.Stock == nil {
+		f = append(f, structure.FilterBy{Field: "stock", Operator: ">=", Value: *q.StockMin})
+	}
+	if q.PriceMin != nil && q.Price == nil {
+		f = append(f, structure.FilterBy{Field: "price", Operator: ">=", Value: *q.PriceMin})
+	}
+	if q.CreatedAtMin != nil {
+		f = append(f, structure.FilterBy{Field: "created_at", Operator: ">=", Value: *q.CreatedAtMin})
+	}
+	if q.UpdatedAtMin != nil {
+		f = append(f, structure.FilterBy{Field: "updated_at", Operator: ">=", Value: *q.UpdatedAtMin})
+	}
+
+	if q.StockMax != nil && q.Stock == nil {
+		f = append(f, structure.FilterBy{Field: "stock", Operator: "<=", Value: *q.StockMax})
+	}
+	if q.PriceMax != nil && q.Price == nil {
+		f = append(f, structure.FilterBy{Field: "price", Operator: "<=", Value: *q.PriceMax})
+	}
+	if q.CreatedAtMax != nil {
+		f = append(f, structure.FilterBy{Field: "created_at", Operator: "<=", Value: *q.CreatedAtMax})
+	}
+	if q.UpdatedAtMax != nil {
+		f = append(f, structure.FilterBy{Field: "updated_at", Operator: "<=", Value: *q.UpdatedAtMax})
+	}
+
+	return f
 }
 
 func (q QueryItem) ToQuerySorts() []structure.SortBy {
