@@ -41,7 +41,7 @@ func (item Item) GetRequestMap() map[string]any {
 	return item.requestMap
 }
 
-func (item Item) FromReuestDto(d dto.RequestDTO) Resource[uuid.UUID] {
+func (item Item) FromRequestDto(d dto.RequestDTO) Resource[uuid.UUID] {
 	m := d.ToRequestMap()
 
 	if name, exists := m["Name"]; exists {

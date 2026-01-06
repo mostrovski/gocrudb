@@ -18,5 +18,5 @@ type Resource[I IdType] interface {
 	GetProtectedFields() []string
 	GetModifiableFields() []string
 	GetRequestMap() map[string]any
-	FromReuestDto(d dto.RequestDTO) Resource[I]
+	FromRequestDto(d dto.RequestDTO) Resource[I]
 }

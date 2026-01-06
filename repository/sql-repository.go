@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"gocrudb/exception"
 	"gocrudb/resource"
 	"gocrudb/structure"
 	"slices"
@@ -39,7 +41,12 @@ func (r SqlRepository[I, R]) Get(conditions structure.Conditions) ([]R, error) {
 }
 
 func (r SqlRepository[I, R]) Find(id I) (R, error) {
-	return r.manager.Where("id = ?", id).First(context.Background())
+
+	instance, err := r.manager.Where("id = ?", id).First(context.Background())
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return instance, exception.ResourceNotFound{Id: id}
+	}
+	return instance, err
 }
 
 func (r SqlRepository[I, R]) Create(instance R) (R, error) {
