@@ -18,6 +18,7 @@ import (
 func main() {
 	config.Set()
 
+	database.Setup()
 	db := database.Init()
 	database.Migrate(db, resource.Item{})
 	database.Seed(db, database.GetSeedItems())

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -9,15 +8,39 @@ import (
 )
 
 var conf = map[string]string{}
+var configured = false
+var defaults = map[string]string{
+	"db_host":     "localhost",
+	"db_port":     "5432",
+	"db_ssl_mode": "disable",
+	"time_zone":   "Europe/Berlin",
+}
 
 func Set() {
-	if len(conf) > 0 {
+	if configured {
 		return
 	}
+
 	godotenv.Load()
 	conf["app_env"] = getEnv("APP_ENV", "dev")
 	conf["app_port"] = getEnv("APP_PORT", "3000")
-	conf["app_dsn"] = postgresDSN()
+	conf["app_db_skip_setup"] = getEnv("DB_SKIP_SETUP", "false")
+	conf["app_db_host"] = getEnv("DB_HOST", defaults["db_host"])
+	conf["app_db_user"] = getEnv("DB_USER", "gocrudb")
+	conf["app_db_password"] = getEnv("DB_PASSWORD", "gocrudb")
+	conf["app_db_name"] = getEnv("DB_NAME", "gocrudb")
+	conf["app_db_port"] = getEnv("DB_PORT", defaults["db_port"])
+	conf["app_db_ssl_mode"] = getEnv("DB_SSL_MODE", defaults["db_ssl_mode"])
+	conf["app_db_time_zone"] = getEnv("DB_TIME_ZONE", defaults["time_zone"])
+	conf["service_db_host"] = getEnv("SERVICE_DB_HOST", defaults["db_host"])
+	conf["service_db_user"] = getEnv("SERVICE_DB_USER", "postgres")
+	conf["service_db_password"] = getEnv("SERVICE_DB_PASSWORD", "")
+	conf["service_db_name"] = getEnv("SERVICE_DB_NAME", "postgres")
+	conf["service_db_port"] = getEnv("SERVICE_DB_PORT", defaults["db_port"])
+	conf["service_db_ssl_mode"] = getEnv("SERVICE_DB_SSL_MODE", defaults["db_ssl_mode"])
+	conf["service_db_time_zone"] = getEnv("SERVICE_DB_TIME_ZONE", defaults["time_zone"])
+
+	configured = true
 }
 
 func Get(key string) string {
@@ -31,17 +54,8 @@ func IsProduction() bool {
 	return strings.Contains(Get("app_env"), "prod")
 }
 
-func postgresDSN() string {
-	return fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
-		getEnv("DB_HOST", "localhost"),
-		getEnv("DB_USER", "gocrudb"),
-		getEnv("DB_PASSWORD", "gocrudb"),
-		getEnv("DB_NAME", "gocrudb"),
-		getEnv("DB_PORT", "5432"),
-		getEnv("DB_SSL_MODE", "disable"),
-		getEnv("DB_TIME_ZONE", "Europe/Berlin"),
-	)
+func ShoulSkipDbSetup() bool {
+	return Get("app_db_skip_setup") == "true"
 }
 
 func getEnv(key string, defaultValue string) string {

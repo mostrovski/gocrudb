@@ -1,9 +1,8 @@
 package database
 
 import (
-	"context"
+	"fmt"
 	"gocrudb/config"
-	"gocrudb/resource"
 	"log"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 )
 
 func Init() *gorm.DB {
-	db, err := gorm.Open(postgres.Open(config.Get("app_dsn")), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(appDSN()), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("DB connection failed: %s", err.Error())
 	}
@@ -30,31 +29,15 @@ func Init() *gorm.DB {
 	return db
 }
 
-func Migrate(db *gorm.DB, resources ...any) {
-	if config.IsProduction() {
-		return
-	}
-
-	for _, r := range resources {
-		db.AutoMigrate(&r)
-	}
-}
-
-func Seed[I resource.IdType, R resource.Resource[I]](db *gorm.DB, resources []R) {
-	if config.IsProduction() {
-		return
-	}
-
-	ctx := context.Background()
-	manager := gorm.G[R](db)
-
-	count, err := manager.Count(ctx, "")
-	if err != nil {
-		return
-	}
-	if count > 0 {
-		return
-	}
-
-	manager.CreateInBatches(ctx, &resources, 100)
+func appDSN() string {
+	return fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
+		config.Get("app_db_host"),
+		config.Get("app_db_user"),
+		config.Get("app_db_password"),
+		config.Get("app_db_name"),
+		config.Get("app_db_port"),
+		config.Get("app_db_ssl_mode"),
+		config.Get("app_db_time_zone"),
+	)
 }
