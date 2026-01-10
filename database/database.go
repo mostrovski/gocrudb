@@ -12,7 +12,7 @@ import (
 )
 
 func Init() *gorm.DB {
-	db, err := gorm.Open(postgres.Open(config.PostgresDSN()), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(config.Get("app_dsn")), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("DB connection failed: %s", err.Error())
 	}

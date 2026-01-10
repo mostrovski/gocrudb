@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"gocrudb/config"
 	"gocrudb/controller"
 	"gocrudb/database"
@@ -15,6 +16,8 @@ import (
 )
 
 func main() {
+	config.Set()
+
 	db := database.Init()
 	database.Migrate(db, resource.Item{})
 	database.Seed(db, database.GetSeedItems())
@@ -35,5 +38,5 @@ func main() {
 	router.PATCH("/inventory/:id", inventoryController.Update())
 	router.DELETE("/inventory/:id", inventoryController.Destroy())
 
-	router.Run(config.AppPort())
+	router.Run(fmt.Sprintf(":%s", config.Get("app_port")))
 }

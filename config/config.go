@@ -4,9 +4,34 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
-func PostgresDSN() string {
+var conf = map[string]string{}
+
+func Set() {
+	if len(conf) > 0 {
+		return
+	}
+	godotenv.Load()
+	conf["app_env"] = getEnv("APP_ENV", "dev")
+	conf["app_port"] = getEnv("APP_PORT", "3000")
+	conf["app_dsn"] = postgresDSN()
+}
+
+func Get(key string) string {
+	if value, exists := conf[key]; exists {
+		return value
+	}
+	return ""
+}
+
+func IsProduction() bool {
+	return strings.Contains(Get("app_env"), "prod")
+}
+
+func postgresDSN() string {
 	return fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
 		getEnv("DB_HOST", "localhost"),
@@ -17,18 +42,6 @@ func PostgresDSN() string {
 		getEnv("DB_SSL_MODE", "disable"),
 		getEnv("DB_TIME_ZONE", "Europe/Berlin"),
 	)
-}
-
-func AppEnv() string {
-	return getEnv("APP_ENV", "dev")
-}
-
-func AppPort() string {
-	return getEnv("APP_PORT", ":3000")
-}
-
-func IsProduction() bool {
-	return strings.Contains(AppEnv(), "prod")
 }
 
 func getEnv(key string, defaultValue string) string {
