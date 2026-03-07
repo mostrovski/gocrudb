@@ -39,6 +39,8 @@ func Set() {
 	conf["service_db_port"] = getEnv("SERVICE_DB_PORT", defaults["db_port"])
 	conf["service_db_ssl_mode"] = getEnv("SERVICE_DB_SSL_MODE", defaults["db_ssl_mode"])
 	conf["service_db_time_zone"] = getEnv("SERVICE_DB_TIME_ZONE", defaults["time_zone"])
+	conf["rate_limiter_requests_per_second"] = getEnv("RATE_LIMITER_REQUESTS_PER_SECOND", "1")
+	conf["rate_limiter_requests_burst_size"] = getEnv("RATE_LIMITER_REQUESTS_BURST_SIZE", "5")
 
 	configured = true
 }

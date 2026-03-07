@@ -5,6 +5,7 @@ import (
 	"gocrudb/config"
 	"gocrudb/controller"
 	"gocrudb/database"
+	"gocrudb/middleware"
 	"gocrudb/repository"
 	"gocrudb/resource"
 	"gocrudb/validation"
@@ -32,6 +33,7 @@ func main() {
 			v.RegisterValidation(tag, val)
 		}
 	}
+	router.Use(middleware.RateLimiter())
 
 	router.GET("/inventory", inventoryController.Index())
 	router.POST("/inventory", inventoryController.Store())
