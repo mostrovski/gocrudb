@@ -36,7 +36,7 @@ func (q QueryItem) ToQueryConditions() structure.Conditions {
 }
 
 func (q QueryItem) ToQueryFilters() []structure.FilterBy {
-	f := []structure.FilterBy{}
+	f := make([]structure.FilterBy, 0, 15)
 
 	if q.Name != nil {
 		f = append(f, structure.FilterBy{Field: "name", Operator: "like", Value: *q.Name})
@@ -78,7 +78,7 @@ func (q QueryItem) ToQueryFilters() []structure.FilterBy {
 }
 
 func (q QueryItem) ToQuerySorts() []structure.SortBy {
-	s := []structure.SortBy{}
+	s := make([]structure.SortBy, 0, 10)
 	defaultSortField := "created_at"
 	defaultDirection := "asc"
 
