@@ -1,0 +1,404 @@
+openapi: 3.1.0
+info:
+  title: gocrudb API
+  version: '1.0'
+  description: Documentation for the gocrudb - a demo API written with GO.
+  contact:
+    name: Andrei Ostrovskii
+    email: ostrovskiime@gmail.com
+    url: https://ostrovskii.me
+servers:
+  - url: http://localhost:3000
+    description: Local
+paths:
+  /inventory:
+    get:
+      summary: Get all items
+      operationId: inventory-get
+      description: |
+        Returns the collection of the existing items. The response can be filtered, sorted, and paginated.
+      parameters: 
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Filter - Item name
+        - in: query
+          name: stock
+          schema:
+            type: integer
+            minimum: 0
+          description: Filter - Item stock
+        - in: query
+          name: stock_min
+          schema:
+            type: integer
+            minimum: 0
+          description: Filter - Item minimal stock
+        - in: query
+          name: stock_max
+          schema:
+            type: integer
+            minimum: 0
+          description: Filter - Item maximal stock
+        - in: query
+          name: price
+          schema:
+            type: number
+            format: double
+          description: Filter - Item price
+        - in: query
+          name: price_min
+          schema:
+            type: number
+            format: double
+          description: Filter - Item minimal price
+        - in: query
+          name: price_max
+          schema:
+            type: number
+            format: double
+          description: Filter - Item maximal price
+        - in: query
+          name: created_at_min
+          schema:
+            type: string
+            format: date
+          description: Filter - Item created at or after (yyyy-mm-dd)
+        - in: query
+          name: created_at_max
+          schema:
+            type: string
+            format: date
+          description: Filter - Item created at or before (yyyy-mm-dd)
+        - in: query
+          name: updated_at_min
+          schema:
+            type: string
+            format: date
+          description: Filter - Item updated at or after (yyyy-mm-dd)
+        - in: query
+          name: updated_at_max
+          schema:
+            type: string
+            format: date
+          description: Filter - Item updated at or before (yyyy-mm-dd)
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+          description: Sort - criteria [name | stock | price | created_at | updated_at]. Accepts multiple values separated by comma
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+          description: Sort - direction [asc | desc]. Accepts multiple values separated by comma
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 0
+          description: Pagination - page number
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            minimum: 0
+          description: Pagination - number of results per page
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/item'
+        '400':
+          $ref: '#/components/responses/400'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      tags:
+        - Inventory
+    post:
+      summary: Add new item
+      operationId: inventory-post
+      description: |
+        Creates and returns a new item.
+      responses: 
+        '201':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/item'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                stock:
+                  type: integer
+                  minimum: 0
+                price:
+                  type: number
+                  format: double
+              required:
+                - name
+                - stock
+                - price
+            examples:
+              example:
+                value:
+                  name: Laptop
+                  stock: 10
+                  price: 1200.50
+      tags:
+        - Inventory
+  /inventory/{id}:
+    get:
+      summary: Get single item
+      operationId: inventory-get-single
+      description: |
+        Returns the item if one exists.
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Item ID
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/item'
+        '400':
+          $ref: '#/components/responses/400ID'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      tags:
+        - Inventory
+    patch:
+      summary: Update item.
+      operationId: inventory-patch
+      description: |
+        Returns updated item if one exists. Partial updates are possible.
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Item ID
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/item'
+        '400':
+          $ref: '#/components/responses/400ID'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                stock:
+                  type: integer
+                  minimum: 0
+                price:
+                  type: number
+                  format: double
+            examples:
+              example:
+                value:
+                  price: 100
+      tags:
+        - Inventory
+    delete:
+      summary: Delete item
+      operationId: inventory-delete
+      description: |
+        Deletes the item if one exists.
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Item ID
+      responses:
+        '200':
+          description: Success.
+        '400':
+          $ref: '#/components/responses/400ID'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      tags:
+        - Inventory
+components:
+  responses:
+    '400':
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+            required:
+              - error
+          examples:
+            example:
+              value:
+                error: "Key: '<key>' Error:Field validation for '<key>' failed on the '<validation-rule>' tag"
+    '400ID':
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+            required:
+              - error
+          examples:
+            example:
+              value:
+                error: "Invalid item id"
+    '404':
+      description: Not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+            required:
+              - error
+          examples:
+            example:
+              value:
+                error: "Resource not found. ID: <id>"
+    '422':
+      description: Invalid request (e.g. validation errors).
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+            required:
+              - error
+          examples:
+            example:
+              value:
+                error: "Key: '<key>' Error:Field validation for '<key>' failed on the '<validation-rule>' tag"
+    '429':
+      description: Too many requests.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+            required:
+              - error
+          examples:
+            example:
+              value:
+                error: 'Too many requests: try again later'
+    '500':
+      description: Internal server error.
+  schemas:
+    item:
+      title: Item
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        stock:
+          type: integer
+          minimum: 0
+        price:
+          type: number
+          format: double
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - stock
+        - price
+        - created_at
+        - updated_at
+      additionalProperties: false
+      examples:
+        - 
+          id: "d4a2a013-896d-49a3-a5a2-7961410861d3"
+          name: "Laptop"
+          stock: 10
+          price: 999.99
+          created_at: "2026-01-10T20:08:26.386632+01:00"
+          updated_at: "2026-01-10T20:08:26.386632+01:00"

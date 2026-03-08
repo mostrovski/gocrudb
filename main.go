@@ -26,6 +26,7 @@ func main() {
 
 	inventoryStore := repository.SqlRepository[uuid.UUID, resource.Item]{}.Init(db)
 	inventoryController := controller.InventoryController{}.Init(inventoryStore)
+	documentationController := controller.DocumentationController{}.Init(config.Get("app_name"))
 
 	router := gin.Default()
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -34,7 +35,10 @@ func main() {
 		}
 	}
 	router.Use(middleware.RateLimiter())
+	router.Static("/apidoc", "./_docs")
+	router.LoadHTMLGlob("./_docs/*.html")
 
+	router.GET("/", documentationController.Index())
 	router.GET("/inventory", inventoryController.Index())
 	router.POST("/inventory", inventoryController.Store())
 	router.GET("/inventory/:id", inventoryController.Show())

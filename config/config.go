@@ -22,6 +22,7 @@ func Set() {
 	}
 
 	godotenv.Load()
+	conf["app_name"] = getEnv("APP_NAME", "gocrudb API")
 	conf["app_env"] = getEnv("APP_ENV", "dev")
 	conf["app_port"] = getEnv("APP_PORT", "3000")
 	conf["app_db_skip_setup"] = getEnv("DB_SKIP_SETUP", "false")
