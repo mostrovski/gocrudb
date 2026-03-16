@@ -273,8 +273,8 @@ paths:
           required: true
           description: Item ID
       responses:
-        '200':
-          description: Success.
+        '204':
+          description: Successfully deleted.
         '400':
           $ref: '#/components/responses/400ID'
         '404':

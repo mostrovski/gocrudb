@@ -139,6 +139,6 @@ func (ic InventoryController) Destroy() gin.HandlerFunc {
 			c.JSON(er.StatusCode, er.Body)
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{})
+		c.JSON(http.StatusNoContent, gin.H{})
 	}
 }
