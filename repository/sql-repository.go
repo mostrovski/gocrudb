@@ -66,6 +66,9 @@ func (r SqlRepository[I, R]) Update(instance R) (R, error) {
 }
 
 func (r SqlRepository[I, R]) Delete(id I) error {
+	if _, err := r.Find(id); err != nil {
+		return err
+	}
 	_, err := r.manager.Where("id = ?", id).Delete(context.Background())
 	return err
 }
