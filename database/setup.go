@@ -45,7 +45,7 @@ func Setup() {
 		fmt.Println("[DB SETUP] User already exists, skip creation")
 	} else {
 		fmt.Println("[DB SETUP] Creating user")
-		_, err = conn.Exec(ctx, fmt.Sprintf("CREATE ROLE %s WITH LOGIN PASSWORD '%s'", dbUser, dbPassword))
+		_, err = conn.Exec(ctx, fmt.Sprintf("CREATE ROLE %s WITH LOGIN PASSWORD '%s'", pgx.Identifier{dbUser}.Sanitize(), dbPassword))
 		if err != nil {
 			log.Fatalf("[DB SETUP] Failed (database create): %v", err)
 		}
@@ -55,7 +55,7 @@ func Setup() {
 		fmt.Println("[DB SETUP] Database already exists, skip creation")
 	} else {
 		fmt.Println("[DB SETUP] Creating database")
-		_, err = conn.Exec(ctx, fmt.Sprintf("CREATE DATABASE %s OWNER %s", dbName, dbUser))
+		_, err = conn.Exec(ctx, fmt.Sprintf("CREATE DATABASE %s OWNER %s", pgx.Identifier{dbName}.Sanitize(), pgx.Identifier{dbUser}.Sanitize()))
 		if err != nil {
 			log.Fatalf("[DB SETUP] Failed (database create): %v", err)
 		}
