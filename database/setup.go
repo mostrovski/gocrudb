@@ -12,7 +12,7 @@ import (
 )
 
 func Setup() {
-	if config.IsProduction() || config.ShoulSkipDbSetup() {
+	if config.IsProduction() || config.ShouldSkipDbSetup() {
 		return
 	}
 

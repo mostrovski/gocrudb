@@ -57,7 +57,7 @@ func IsProduction() bool {
 	return strings.Contains(Get("app_env"), "prod")
 }
 
-func ShoulSkipDbSetup() bool {
+func ShouldSkipDbSetup() bool {
 	return Get("app_db_skip_setup") == "true"
 }
 
