@@ -301,7 +301,7 @@ components:
           examples:
             example:
               value:
-                error: "Key: '<key>' Error:Field validation for '<key>' failed on the '<validation-rule>' tag"
+                error: "Bad request: Key: '<key>' Error:Field validation for '<key>' failed on the '<validation-rule>' tag"
     '400ID':
       description: Bad request.
       content:
@@ -316,7 +316,7 @@ components:
           examples:
             example:
               value:
-                error: "Invalid item id"
+                error: "Bad request: Invalid item id"
     '404':
       description: Not found.
       content:
@@ -346,7 +346,7 @@ components:
           examples:
             example:
               value:
-                error: "Key: '<key>' Error:Field validation for '<key>' failed on the '<validation-rule>' tag"
+                error: "Unprocessable: Key: '<key>' Error:Field validation for '<key>' failed on the '<validation-rule>' tag"
     '429':
       description: Too many requests.
       content:

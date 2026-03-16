@@ -7,5 +7,5 @@ type InvalidRequest struct {
 }
 
 func (e InvalidRequest) Error() string {
-	return fmt.Sprintf("%s", e.Reason)
+	return fmt.Sprintf("Bad request: %s", e.Reason)
 }
